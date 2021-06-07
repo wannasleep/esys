@@ -2,6 +2,18 @@ import requests
 import pymongo
 import pandas as pd 
 
+def load_machhines(db, session):
+    db.drop_collection('machines')
+    colection = db['machines']
+    page_num=0
+    response = session.get("https://api.eversys-telemetry.com/v3/machines?offset={}".format(page_num))
+    collection_machines.insert_many(response.json)
+    while(len(response.json > 0)):
+        page_num += 1
+        response = session.get("https://api.eversys-telemetry.com/v3/machines?offset={}".format(page_num))
+        collection_machines.insert_many(response.json)
+
+
 machine_ids = ['14658', '14651', '11027', '9048', '8863']
 
 df = pd.DataFrame()
@@ -16,7 +28,7 @@ print(df['date'])
 
 session = requests.Session()
 session.headers.update({"Accept": "application/json"})
-session.headers.update({'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjYzZjEwOWRlNDlmZWM2YTdjMWJjODU3MzUwODQwMzdlMjhlM2Q3M2ZlNTkyYjIxYzFlZDNmMTc4MTk0YTQ3NDdhMGYzMzgzZTJhNTIwNDBmIn0.eyJhdWQiOiI5IiwianRpIjoiNjNmMTA5ZGU0OWZlYzZhN2MxYmM4NTczNTA4NDAzN2UyOGUzZDczZmU1OTJiMjFjMWVkM2YxNzgxOTRhNDc0N2EwZjMzODNlMmE1MjA0MGYiLCJpYXQiOjE2MTU4MDUwMTYsIm5iZiI6MTYxNTgwNTAxNiwiZXhwIjoxNjE2NDA5ODE2LCJzdWIiOiIxODQiLCJzY29wZXMiOlsib3BlbmlkIl19.hL07SOYjw8EH9ZlDWSTML3zKvOJH9MfgzSm9nptTiqXHdCxmZrBpsDEh2xW-ZF_DKVrxT5JomJnwnWrSp339rYus_MtAwrzU78fafBRNWxmk0ZBVLp51jruRc2dT5b7TuvwC4IyB14H4XFDnWnMn9g_UwTDKUvvLJQLlhW9qz8V2QRy90E-_SBxxwscFdB8evS0lb7JM5TXOdM6K1Zn0BC3A3rkY9d6v-SsycWvt1W59NZlrB-jx3HN1lwJQCTtD1fSsWWpfmX9EJWJgaALStM_a5AAAcsEqTWId-VlPqZL61MIK9cimOfNlU1oAiPCzIIxrktUsCP0HhsuEsF78Tb85PrAmH60lTaQqveSZtfBQRPdToMpzdTpWmBmrO3NebjjYQGG2xTmDQeMtc1geyMwWd7h_J9WZkqW4Mo4V5UoEr2KRPPCQzVWsut-sIXnb1vlm5vt2h9pRnJS2ooGpLydDysnMgJuYtkCDBgy05vDXPLiaW5R88JyaNdfg2r8n2AGOf5847G-PkjZVRCbG_jwcUa2nOX6yA16gaCndurju92Y1A0kntJo3SBAQIwWjrMYei43Xn9ZWGpZXYUVBvnA1uSPrZBpdHZMs_TrDa1NML3IdCS3XshnVXOfBOvhjAZNETV91UpzlkgXRmAb7bvRm62HLujpWdJgdKooW9Vw'})
+session.headers.update({'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjY2ZGI2Y2E2MWM2MTM0Y2FiNzQ2Mjk5ODAyNmY4OTMxNmQ4NDljZmIwYjU5YzdjOWYzYTkxNDUzZTgwYmI0ZTI1MGU1OGJkZGU0NWY2MjkyIn0.eyJhdWQiOiI5IiwianRpIjoiNjZkYjZjYTYxYzYxMzRjYWI3NDYyOTk4MDI2Zjg5MzE2ZDg0OWNmYjBiNTljN2M5ZjNhOTE0NTNlODBiYjRlMjUwZTU4YmRkZTQ1ZjYyOTIiLCJpYXQiOjE2MTYzMjA3MDQsIm5iZiI6MTYxNjMyMDcwNCwiZXhwIjoxNjE2OTI1NTA0LCJzdWIiOiIxODQiLCJzY29wZXMiOlsib3BlbmlkIl19.Zy6iBBFPm7gEPy5n4tk6-XHPIQyQwrqV7hp82fsN8cl_1RLQ3iJmoVHmq5q_fL2P8JeRb9BJAVsONb9WVZiVe2gyaamJzCwo0FrHdF18iCM9ZuZev6rWL_sUmOCC8Xa8dHcMq5LJ6SFZUs_jtQI_ezk8tZ4KXfGVzI74DAkUmK8YPpHO2sB-yTbPD0cq_RG3vSYDuAFGLHNtgkw3jmL3CuJLDX6weySHo9oZULr_H124IrW4JpPF8fjj04m2XjtEQ26RPAaHQ9FxwG-PT97rGse98nLNncLYTO2tJuCK90y8AvZNp179h_A1mliNbiX8W4q1fM1eYAHDmI4ewbTQMyLx-pyyMn6Xr36yeC-UqTrVQMvs5-X88cOW-dpIQVjFZYd7xm9Ejaxgl4MjOSsRadhrGoV7uGbY1VsswMiAhGwwHBKZK_l-ZxLEcYaXA3xd1amYceHrW6qFU6lzq3gq3mBNiY6xF1oGz3sKVrI-v9_BQB-CeD4kLcoV_Xxr-go6Aho1ii9zalb_6P8IDg5KIUVfD69QaiI_YCRUV8vus9oCiIgjOrRIGhZWYa9z7e3sToiaD9NLtpHivCluhgLGbNxoaxVSQiOfIl585hMHe-XSY0SjsXJOjmM1wz6j1zqr47EAFv3jjkOqCTswXQCEyslMwihZPUGmL7HP0ugzdKs'})
 
 
 client = pymongo.MongoClient('localhost', 27017)  
